@@ -268,6 +268,16 @@ public class Soundex implements StringEncoder {
     }
 
     /**
+     * Checks whether the H and W rule skips this character.
+     *
+     * @param ch the character to check.
+     * @return whether the character should be skipped.
+     */
+    private boolean shouldIgnoreHW(final char ch) {
+        return this.specialCaseHW && (ch == 'H' || ch == 'W');
+    }
+
+    /**
      * Retrieves the Soundex code for a given String object.
      *
      * @param str String to encode using the Soundex algorithm.
@@ -289,7 +299,7 @@ public class Soundex implements StringEncoder {
         char lastDigit = map(first); // previous digit
         for (int i = 1; i < str.length() && count < out.length; i++) {
             final char ch = str.charAt(i);
-            if (this.specialCaseHW && (ch == 'H' || ch == 'W')) { // these are ignored completely
+            if (shouldIgnoreHW(ch)) {
                 continue;
             }
             final char digit = map(ch);
