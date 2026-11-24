@@ -244,7 +244,8 @@ public class Base16 extends BaseNCodec {
             return;
         }
         final int dataLen = Math.min(data.length - offset, length);
-        final int availableChars = (context.ibitWorkArea != 0 ? 1 : 0) + dataLen;
+        final boolean hasPendingHexDigit = context.ibitWorkArea != 0;
+        final int availableChars = (hasPendingHexDigit ? 1 : 0) + dataLen;
         // small optimization to short-cut the rest of this method when it is fed byte-by-byte
         if (availableChars == 1 && availableChars == dataLen) {
             // store 1/2 byte for next invocation of decode, we offset by +1 as empty-value is 0
@@ -256,7 +257,7 @@ public class Base16 extends BaseNCodec {
         final int end = offset + dataLen;
         final byte[] buffer = ensureBufferSize(charsToProcess / BYTES_PER_ENCODED_BLOCK, context);
         int result;
-        if (dataLen < availableChars) {
+        if (hasPendingHexDigit) {
             // we have 1/2 byte from previous invocation to decode
             result = context.ibitWorkArea - 1 << BITS_PER_ENCODED_BYTE;
             result |= decodeOctet(data[offset++]);
