@@ -131,21 +131,32 @@ public class Digest {
             }
         }
         if (systemIn != null && !digests.isEmpty()) {
-            // Standard input cannot be replayed; update every digest from the same bounded buffer.
-            final byte[] buffer = new byte[8192];
-            int read;
-            while ((read = systemIn.read(buffer)) != -1) {
-                for (final MessageDigest messageDigest : digests.values()) {
-                    messageDigest.update(buffer, 0, read);
-                }
-            }
-            for (final Map.Entry<String, MessageDigest> entry : digests.entrySet()) {
-                println(entry.getKey() + " ", entry.getValue().digest());
-            }
+            digestStandardInput(systemIn, digests);
         } else {
             for (final Map.Entry<String, MessageDigest> entry : digests.entrySet()) {
                 run(systemIn, entry.getKey() + " ", entry.getValue());
             }
+        }
+    }
+
+    /**
+     * Reads standard input once and prints the digest for each requested algorithm.
+     *
+     * @param systemIn the standard input stream.
+     * @param digests the digests in output order.
+     * @throws IOException if reading standard input fails.
+     */
+    private void digestStandardInput(final BufferedInputStream systemIn, final Map<String, MessageDigest> digests) throws IOException {
+        // Standard input cannot be replayed; update every digest from the same bounded buffer.
+        final byte[] buffer = new byte[8192];
+        int read;
+        while ((read = systemIn.read(buffer)) != -1) {
+            for (final MessageDigest messageDigest : digests.values()) {
+                messageDigest.update(buffer, 0, read);
+            }
+        }
+        for (final Map.Entry<String, MessageDigest> entry : digests.entrySet()) {
+            println(entry.getKey() + " ", entry.getValue().digest());
         }
     }
 
